@@ -54,10 +54,10 @@ public static class GetMentionsFromTwitter {
     static void GoGetMentionsFromTwitter() {
         System.Console.WriteLine($"CheckMentions.GetMentionsFromTwitter()");
         var results = UserClient.Timelines.GetMentionsTimelineAsync();
-
         foreach (var item in results.Result) {
+            AnalyzeMention.Analyze(item);
             // await context.Response.WriteAsync($"Full text: {item.FullText}");
-            System.Console.WriteLine($"Full text: {item.FullText}");
+            // System.Console.WriteLine($"Full text: {item.FullText}");
         }
     }
 }
