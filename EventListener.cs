@@ -1,4 +1,4 @@
-#define LOCAL
+// #define LOCAL
 using System.Threading;
 using System.Threading.Tasks;
 using CloudNative.CloudEvents;
