@@ -3,6 +3,8 @@ using Tweetinvi.Models;
 using Tweetinvi;
 using System.Threading.Tasks;
 using Google.Cloud.Firestore;
+using Tweetinvi.Parameters;
+using System.Collections.Generic;
 
 public static class GetMentionsFromTwitter {
     static string ProjectID => "enduring-badge-305203";
@@ -38,6 +40,7 @@ public static class GetMentionsFromTwitter {
         };
 
         UserClient = new TwitterClient(TwitterCredentials);
+        UserClient.Config.Limits.TIMELINE_MENTIONS_PAGE_MAX_PAGE_SIZE = 10;
         CompareToKnownMentions = new CompareToKnownMentions();
     }
     public async static void Go() {
@@ -82,6 +85,5 @@ public static class GetMentionsFromTwitter {
         System.Console.WriteLine($"CheckMentions.GetMentionsFromTwitter()");
         var results = await UserClient.Timelines.GetMentionsTimelineAsync();
         return results;
-
     }
 }
