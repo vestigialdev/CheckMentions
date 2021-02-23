@@ -21,7 +21,7 @@ public class CompareToKnownMentions {
         }
     }
 
-    public async Task<bool> IsKnown(ITweet tweet) {
+    public static async Task<bool> IsKnown(ITweet tweet) {
         CollectionReference mentions = DB.Collection("mentions");
         var matching = mentions.WhereEqualTo("tweetId", tweet.IdStr);
         QuerySnapshot snapshot = await matching.GetSnapshotAsync();
@@ -30,7 +30,7 @@ public class CompareToKnownMentions {
         return snapshot.Count > 0;
     }
 
-    public async Task WriteToDB(ITweet tweet) {
+    public static async Task WriteToDB(ITweet tweet) {
 
         DocumentReference docRef = DB.Collection("mentions").Document(tweet.IdStr);
 

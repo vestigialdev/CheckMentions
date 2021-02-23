@@ -41,7 +41,9 @@ public static class GetMentionsFromTwitter {
 
         UserClient = new TwitterClient(TwitterCredentials);
         UserClient.Config.Limits.TIMELINE_MENTIONS_PAGE_MAX_PAGE_SIZE = 10;
-        CompareToKnownMentions = new CompareToKnownMentions();
+        UserClient.Config.Limits.LISTS_GET_TWEETS_MAX_PAGE_SIZE = 10;
+        UserClient.Config.Limits.TIMELINE_HOME_PAGE_MAX_PAGE_SIZE = 10;
+        // CompareToKnownMentions = new CompareToKnownMentions();
     }
     public async static void Go() {
         Setup();
