@@ -3,18 +3,18 @@ using System.Threading.Tasks;
 using CloudNative.CloudEvents;
 using Google.Cloud.Functions.Framework;
 using Google.Events.Protobuf.Cloud.PubSub.V1;
-
+using Microsoft.AspNetCore.Http;
 
 namespace CheckMentions {
-    public class Incoming : ICloudEventFunction<MessagePublishedData> {
+    // public class Incoming : IHttpFunction {
 
-        public Incoming() {
-            //If running locally, perform the mentions-getting early, 
-            //because  there will be a failure before the true HandleAsync method is called
-            if (string.Compare("true", System.Environment.GetEnvironmentVariable("LOCAL")) == 0) {
-                GetMentionsFromTwitter.Go();
-            }
-        }
+    //     public Task HandleAsync(HttpContext context) {
+    //         GetMentionsFromTwitter.Go();
+    //         return Task.CompletedTask;
+    //     }
+    // }
+    public class Incoming : ICloudEventFunction<PubsubMessage> {
+
         public Task HandleAsync(CloudEvent cloudEvent, MessagePublishedData data, CancellationToken cancellationToken) {
             GetMentionsFromTwitter.Go();
             return Task.CompletedTask;

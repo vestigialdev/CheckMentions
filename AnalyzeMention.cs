@@ -1,4 +1,5 @@
 using Tweetinvi.Models;
+using Tweetinvi.Models.V2;
 using Tweetinvi;
 using System.Threading.Tasks;
 using System.Text.RegularExpressions;
@@ -6,55 +7,58 @@ using System.Text.RegularExpressions;
 public static class AnalyzeMention {
 
     static string TwitterImageHostRegexPattern = @"(https?:\/\/pbs.twimg.com\/media\/([a-zA-Z0-9_]){15}.(png|gif|jpg))";
-    static int Offset => "http://pbs.twimg.com/media/".Length;
+    static int Offset => "https://pbs.twimg.com/media/".Length;
 
     async public static void Analyze(ITweet tweet) {
-        System.Console.WriteLine($"Analyzing {tweet.IdStr}");
 
-        var isAReply = await IsMentionReplyingToMedia(tweet);
-        // await isAReply;
-
-        if (!isAReply) {
-            //User error
-            return;
+        if (ContainsValidMedia(tweet)) {
+            ParseMedia(tweet);
+        } else if (IsAReply(tweet)) {
+            var parentTweet = GetReplyParent(tweet);
+            Analyze(parentTweet.Result);
         }
 
-        if (!IsMentionedMediaNew(tweet)) {
-            //Inform the user by replying with the description
-            return;
-        }
     }
-
-    async static Task<bool> IsMentionReplyingToMedia(ITweet tweet) {
-
-        //Is this even a reply?
-        if (null == tweet.InReplyToStatusIdStr) {
-            System.Console.WriteLine($"{tweet.IdStr} is not a reply");
-            return false;
-        }
-
-        //Is the thing this is a reply to, containing media?
-        // var result = await tweet.Client.TweetsV2.GetTweetAsync(tweet.InReplyToStatusIdStr);
-
+    async static Task<ITweet> GetReplyParent(ITweet tweet) {
+        var result = await tweet.Client.Tweets.GetTweetAsync((long)tweet.InReplyToStatusId);
+        return result;
+    }
+    static void ParseMedia(ITweet tweet) {
         foreach (var item in tweet.Entities.Medias) {
             if (string.Compare("photo", item.MediaType, true) == 0) {
-                System.Console.WriteLine($"{tweet.IdStr} media entity url {item.MediaURL}");
+                // System.Console.WriteLine($"{tweet.IdStr} media entity url {item.MediaURLHttps}");
 
                 //Ensure its  hosted by twitter
                 if (!Regex.IsMatch(item.MediaURL, TwitterImageHostRegexPattern)) {
-                    System.Console.WriteLine($"Non-twitter hosted image? {item.MediaURL}");
-                    return false;
+                    System.Console.WriteLine($"Non-twitter hosted image? {item.MediaURLHttps}");
+                    return;
                 }
 
                 var imageKey = item.MediaURL.Substring(Offset, 15);
                 System.Console.WriteLine($"Image key: {imageKey}");
             }
         }
-
-        return true;
     }
+    static bool ContainsValidMedia(ITweet tweet) {
+        foreach (var item in tweet.Entities.Medias) {
+            if (string.Compare("photo", item.MediaType, true) == 0) {
+                // System.Console.WriteLine($"{tweet.IdStr} media entity url {item.MediaURLHttps}");
 
-    static bool IsMentionedMediaNew(ITweet tweet) {
-        return true;
+                //Ensure its  hosted by twitter
+                if (!Regex.IsMatch(item.MediaURL, TwitterImageHostRegexPattern)) {
+                    // System.Console.WriteLine($"Non-twitter hosted image? {item.MediaURLHttps}");
+                    return false;
+                }
+
+                var imageKey = item.MediaURL.Substring(Offset, 15);
+                // System.Console.WriteLine($"Image key: {imageKey}");
+                return true;
+            }
+        }
+
+        return false;
+    }
+    static bool IsAReply(ITweet tweet) {
+        return null != tweet.InReplyToStatusIdStr;
     }
 }

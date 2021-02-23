@@ -1,8 +1,12 @@
 using Google.Cloud.SecretManager.V1;
 using Tweetinvi.Models;
 using Tweetinvi;
+using System.Threading.Tasks;
+using Google.Cloud.Firestore;
 
 public static class GetMentionsFromTwitter {
+    static string ProjectID => "enduring-badge-305203";
+    static System.Collections.Generic.List<string> RecentKnowns = new System.Collections.Generic.List<string>();
 
     #region Tokens
     static string ProjectPath => @"projects/enduring-badge-305203";
@@ -11,13 +15,13 @@ public static class GetMentionsFromTwitter {
     static string BearerToken => GetSecret("TWITTER_BEARER_TOKEN");
     static string UserAccessToken => GetSecret("TWITTER_USER_ACCESS_TOKEN");
     static string UserAccessTokenSecret => GetSecret("TWITTER_USER_ACCESS_TOKEN_SECRET");
-    // string NGROKAddress = "https://268761ad3537.ngrok.io/";
-    // long alt_network_id = 1362289253686870016;
     #endregion
 
     static SecretManagerServiceClient GoogleSecretsClient;
     static TwitterCredentials TwitterCredentials;
     static TwitterClient UserClient;
+    static CompareToKnownMentions CompareToKnownMentions;
+
     static void Setup() {
         System.Console.WriteLine($"CheckMentions.Setup()");
 
@@ -34,11 +38,34 @@ public static class GetMentionsFromTwitter {
         };
 
         UserClient = new TwitterClient(TwitterCredentials);
+        CompareToKnownMentions = new CompareToKnownMentions();
     }
-    public static void Go() {
+    public async static void Go() {
         Setup();
         // System.Console.WriteLine($"GetMentionsFromTwitter.Go(): AppConsumerID is {AppConsumerID}");
-        GoGetMentionsFromTwitter();
+        var recentMentions = await GoGetMentionsFromTwitter();
+
+        foreach (var tweet in recentMentions) {
+
+
+            if (RecentKnowns.Contains(tweet.IdStr)) {
+                System.Console.WriteLine("Mention was recently seen in this environment, ignoring");
+                continue;
+            }
+
+            System.Console.WriteLine("Mention wasn't seen recently, checking DB..");
+
+            //Skip over known mentions
+            if (await CompareToKnownMentions.IsKnown(tweet)) {
+                System.Console.WriteLine("Mention is known to DB, adding to recent mentions");
+                RecentKnowns.Add(tweet.IdStr);
+                continue;
+            }
+
+            //Mention is unknown so upload it to the database
+            System.Console.WriteLine("Mention is unknown to DB, adding");
+            await CompareToKnownMentions.WriteToDB(tweet);
+        }
     }
 
     static string GetSecret(string secretName) {
@@ -51,13 +78,10 @@ public static class GetMentionsFromTwitter {
             throw;
         }
     }
-    static void GoGetMentionsFromTwitter() {
+    async static Task<ITweet[]> GoGetMentionsFromTwitter() {
         System.Console.WriteLine($"CheckMentions.GetMentionsFromTwitter()");
-        var results = UserClient.Timelines.GetMentionsTimelineAsync();
-        foreach (var item in results.Result) {
-            AnalyzeMention.Analyze(item);
-            // await context.Response.WriteAsync($"Full text: {item.FullText}");
-            // System.Console.WriteLine($"Full text: {item.FullText}");
-        }
+        var results = await UserClient.Timelines.GetMentionsTimelineAsync();
+        return results;
+
     }
 }
