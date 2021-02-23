@@ -13,7 +13,7 @@ namespace CheckMentions {
     //         return Task.CompletedTask;
     //     }
     // }
-    public class Incoming : ICloudEventFunction<PubsubMessage> {
+    public class Incoming : ICloudEventFunction<MessagePublishedData> {
 
         public Task HandleAsync(CloudEvent cloudEvent, MessagePublishedData data, CancellationToken cancellationToken) {
             GetMentionsFromTwitter.Go();
