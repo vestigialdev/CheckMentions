@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Google.Cloud.Firestore;
 using Tweetinvi.Parameters;
 using System.Collections.Generic;
+using Tweetinvi.Exceptions;
 
 public static class GetMentionsFromTwitter {
     static string ProjectID => "enduring-badge-305203";
@@ -22,7 +23,6 @@ public static class GetMentionsFromTwitter {
     static SecretManagerServiceClient GoogleSecretsClient;
     static TwitterCredentials TwitterCredentials;
     static TwitterClient UserClient;
-    static CompareToKnownMentions CompareToKnownMentions;
 
     static void Setup() {
         System.Console.WriteLine($"CheckMentions.Setup()");
@@ -49,6 +49,7 @@ public static class GetMentionsFromTwitter {
         Setup();
         // System.Console.WriteLine($"GetMentionsFromTwitter.Go(): AppConsumerID is {AppConsumerID}");
         var recentMentions = await GoGetMentionsFromTwitter();
+        System.Console.WriteLine($"Got mentions from Twitter. parsing {recentMentions.Length} entries");
 
         foreach (var tweet in recentMentions) {
 
@@ -85,7 +86,15 @@ public static class GetMentionsFromTwitter {
     }
     async static Task<ITweet[]> GoGetMentionsFromTwitter() {
         System.Console.WriteLine($"CheckMentions.GetMentionsFromTwitter()");
-        var results = await UserClient.Timelines.GetMentionsTimelineAsync();
+        var results = new ITweet[0];
+
+        try {
+            results = await UserClient.Timelines.GetMentionsTimelineAsync();
+            System.Console.WriteLine($"CheckMentions.GetMentionsFromTwitter() success");
+        } catch (TwitterException e) {
+            System.Console.WriteLine(e.ToString());
+        }
+
         return results;
     }
 }
