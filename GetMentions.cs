@@ -7,7 +7,7 @@ using Tweetinvi.Parameters;
 using System.Collections.Generic;
 using Tweetinvi.Exceptions;
 
-public static class GetMentionsFromTwitter {
+public class GetMentionsFromTwitter {
     static string ProjectID => "enduring-badge-305203";
     static System.Collections.Generic.List<string> RecentKnowns = new System.Collections.Generic.List<string>();
 
@@ -43,11 +43,10 @@ public static class GetMentionsFromTwitter {
         UserClient.Config.Limits.TIMELINE_MENTIONS_PAGE_MAX_PAGE_SIZE = 10;
         UserClient.Config.Limits.LISTS_GET_TWEETS_MAX_PAGE_SIZE = 10;
         UserClient.Config.Limits.TIMELINE_HOME_PAGE_MAX_PAGE_SIZE = 10;
-        // CompareToKnownMentions = new CompareToKnownMentions();
     }
+
     public async static void Go() {
         Setup();
-        // System.Console.WriteLine($"GetMentionsFromTwitter.Go(): AppConsumerID is {AppConsumerID}");
         var recentMentions = await GoGetMentionsFromTwitter();
         System.Console.WriteLine($"Got mentions from Twitter. parsing {recentMentions.Length} entries");
 
@@ -93,6 +92,7 @@ public static class GetMentionsFromTwitter {
             System.Console.WriteLine($"CheckMentions.GetMentionsFromTwitter() success");
         } catch (TwitterException e) {
             System.Console.WriteLine(e.ToString());
+            throw;
         }
 
         return results;
