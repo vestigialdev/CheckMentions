@@ -9,75 +9,76 @@ using Tweetinvi.Exceptions;
 using System.Linq;
 using Google.Cloud.SecretManager.V1;
 using Tweetinvi.Iterators;
+namespace CheckMentions {
 
-public class GetMentionsFromTwitter {
-    static string ProjectID => "alttextnetwork";
+    public class GetMentionsFromTwitter {
+        string ProjectID => "alttextnetwork";
 
-    static System.Collections.Generic.List<string> RecentKnowns = new System.Collections.Generic.List<string>();
+        System.Collections.Generic.List<string> RecentKnowns = new System.Collections.Generic.List<string>();
 
 
-    static TwitterCredentials TwitterCredentials;
-    static TwitterClient UserClient;
+        TwitterCredentials TwitterCredentials;
+        TwitterClient UserClient;
 
-    static void Setup() {
-        //Build  credentials
-        TwitterCredentials = new TwitterCredentials() {
-            ConsumerKey = GetSecrets.GetSecret(ProjectID, "TWITTER_CONSUMER_ID"),
-            ConsumerSecret = GetSecrets.GetSecret(ProjectID, "TWITTER_CONSUMER_SECRET"),
-            AccessToken = GetSecrets.GetSecret(ProjectID, "TWITTER_USER_ACCESS_TOKEN"),
-            AccessTokenSecret = GetSecrets.GetSecret(ProjectID, "TWITTER_USER_ACCESS_TOKEN_SECRET"),
-            BearerToken = GetSecrets.GetSecret(ProjectID, "TWITTER_BEARER_TOKEN"),
-        };
+        void Setup() {
+            //Build  credentials
+            TwitterCredentials = new TwitterCredentials() {
+                ConsumerKey = GetSecrets.GetSecret(ProjectID, "TWITTER_CONSUMER_ID"),
+                ConsumerSecret = GetSecrets.GetSecret(ProjectID, "TWITTER_CONSUMER_SECRET"),
+                AccessToken = GetSecrets.GetSecret(ProjectID, "TWITTER_USER_ACCESS_TOKEN"),
+                AccessTokenSecret = GetSecrets.GetSecret(ProjectID, "TWITTER_USER_ACCESS_TOKEN_SECRET"),
+                // BearerToken = GetSecrets.GetSecret(ProjectID, "TWITTER_BEARER_TOKEN"),
+            };
 
-        UserClient = new TwitterClient(TwitterCredentials);
-    }
-
-    public async static void Go() {
-        Setup();
-        ITwitterIterator<ITweet, long?> MentionsIterator;
-
-        var userData = await UserClient.Users.GetAuthenticatedUserAsync();
-        Console.WriteLine($"Authenticated user {userData.Name}");
-
-        try {
-            System.Console.WriteLine("Getting mentions...");
-            MentionsIterator = UserClient.Timelines.GetMentionsTimelineIterator();
-        } catch (TwitterException e) {
-            System.Console.WriteLine("Problem getting Mentions Timeline iterator");
-            throw e;
+            UserClient = new TwitterClient(TwitterCredentials);
         }
 
-        List<ITweet> Mentions = new List<ITweet>();
+        public async void Go() {
+            Setup();
 
-        while (!MentionsIterator.Completed) {
+            var userData = await UserClient.Users.GetAuthenticatedUserAsync();
+            Console.WriteLine($"Authenticated user {userData.Name}");
 
-            var page = await MentionsIterator.NextPageAsync();
-            Console.WriteLine("Retrieved " + page.Count() + " mentions on this page");
+            // try {
+            //     System.Console.WriteLine("Getting mentions...");
+            //     MentionsIterator = UserClient.Timelines.GetMentionsTimelineIterator();
+            // } catch (TwitterException e) {
+            //     System.Console.WriteLine("Problem getting Mentions Timeline iterator");
+            //     throw e;
+            // }
 
-            foreach (var tweet in page) {
-                // Console.WriteLine($"Mention contents: {tweet.FullText}");
-                Mentions.Add(tweet);
-            }
-        }
+            // List<ITweet> Mentions = new List<ITweet>();
 
-        foreach (var tweet in Mentions) {
+            // while (!MentionsIterator.Completed) {
 
-            //Check if mention has been evaluated recently
-            if (RecentKnowns.Contains(tweet.IdStr)) {
-                System.Console.WriteLine("Mention was recently seen in this environment, ignoring");
-                continue;
-            }
+            //     var page = await MentionsIterator.NextPageAsync();
+            //     Console.WriteLine("Retrieved " + page.Count() + " mentions on this page");
 
-            System.Console.WriteLine("Mention wasn't seen recently, checking FireStore..");
+            //     foreach (var tweet in page) {
+            //         // Console.WriteLine($"Mention contents: {tweet.FullText}");
+            //         Mentions.Add(tweet);
+            //     }
+            // }
 
-            //Check if mention has been evaluated ever
-            if (await CheckFireStoreDB.IsKnown(tweet)) {
-                System.Console.WriteLine("Mention is known to FireStore DB, adding to recent mentions");
-                RecentKnowns.Add(tweet.IdStr);
-                continue;
-            }
-            System.Console.WriteLine("Mention is unknown to DB, adding..");
-            await CheckFireStoreDB.WriteToDB(tweet);
+            // foreach (var tweet in Mentions) {
+
+            //     //Check if mention has been evaluated recently
+            //     if (RecentKnowns.Contains(tweet.IdStr)) {
+            //         System.Console.WriteLine("Mention was recently seen in this environment, ignoring");
+            //         continue;
+            //     }
+
+            //     System.Console.WriteLine("Mention wasn't seen recently, checking FireStore..");
+
+            //     //Check if mention has been evaluated ever
+            //     if (await CheckFireStoreDB.IsKnown(tweet)) {
+            //         System.Console.WriteLine("Mention is known to FireStore DB, adding to recent mentions");
+            //         RecentKnowns.Add(tweet.IdStr);
+            //         continue;
+            //     }
+            //     System.Console.WriteLine("Mention is unknown to DB, adding..");
+            //     await CheckFireStoreDB.WriteToDB(tweet);
+            // }
         }
     }
 }
