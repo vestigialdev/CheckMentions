@@ -7,9 +7,10 @@ using Tweetinvi.Models;
 using Tweetinvi.Models.V2;
 using Tweetinvi;
 
-public class CompareToKnownMentions {
+public class CheckFireStoreDB {
 
-    static string ProjectID => "enduring-badge-305203";
+    static string ProjectID => "alttextnetwork";
+
     static FirestoreDb _DB;
     static FirestoreDb DB {
         get {
@@ -22,26 +23,38 @@ public class CompareToKnownMentions {
     }
 
     public static async Task<bool> IsKnown(ITweet tweet) {
-        CollectionReference mentions = DB.Collection("mentions");
-        var matching = mentions.WhereEqualTo("tweetId", tweet.IdStr);
-        QuerySnapshot snapshot = await matching.GetSnapshotAsync();
-        System.Console.WriteLine($"There are {snapshot.Count} known tweets with a matching TweetId");
 
-        return snapshot.Count > 0;
+        try {
+            CollectionReference mentions = DB.Collection("mentions");
+            var matching = mentions.WhereEqualTo("tweetId", tweet.IdStr);
+            QuerySnapshot snapshot = await matching.GetSnapshotAsync();
+            System.Console.WriteLine($"There are {snapshot.Count} known tweets with a matching TweetId");
+            return snapshot.Count > 0;
+        } catch (System.Exception e) {
+            System.Console.WriteLine("Problem querying FireStore  DB");
+            throw e;
+        }
     }
 
     public static async Task WriteToDB(ITweet tweet) {
 
-        DocumentReference docRef = DB.Collection("mentions").Document(tweet.IdStr);
+        try {
+            //Mention is unknown so upload it to the database
+            DocumentReference docRef = DB.Collection("mentions").Document(tweet.IdStr);
 
-        Dictionary<string, object> user = new Dictionary<string, object>
-        {
+            Dictionary<string, object> user = new Dictionary<string, object>
+            {
                 { "tweetId", $"{tweet.IdStr}" },
                 { "isReply", "null" },
                 { "hasMedia", "null" }
             };
 
-        System.Console.WriteLine($"Mention #{tweet.IdStr} written to db.");
-        await docRef.SetAsync(user);
+            System.Console.WriteLine($"Mention #{tweet.IdStr} written to db.");
+            await docRef.SetAsync(user);
+        } catch (System.Exception e) {
+            System.Console.WriteLine("Problem writing to FireStore  DB");
+            throw e;
+        }
+
     }
 }
