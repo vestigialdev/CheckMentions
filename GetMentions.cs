@@ -36,17 +36,12 @@ public class GetMentionsFromTwitter {
         Setup();
         ITwitterIterator<ITweet, long?> MentionsIterator;
 
+        var userData = await UserClient.Users.GetAuthenticatedUserAsync();
+        Console.WriteLine($"Authenticated user {userData.Name}");
+
         try {
             System.Console.WriteLine("Getting mentions...");
-
-            var parameters = new GetMentionsTimelineParameters();
-            parameters.IncludeContributorDetails = false;
-            parameters.IncludeEntities = false;
-            parameters.TrimUser = true;
-            parameters.TweetMode = TweetMode.None;
-
-            MentionsIterator = UserClient.Timelines.GetMentionsTimelineIterator(parameters);
-
+            MentionsIterator = UserClient.Timelines.GetMentionsTimelineIterator();
         } catch (TwitterException e) {
             System.Console.WriteLine("Problem getting Mentions Timeline iterator");
             throw e;
