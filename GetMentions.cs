@@ -52,31 +52,37 @@ public class GetMentionsFromTwitter {
             throw e;
         }
 
+        List<ITweet> Mentions = new List<ITweet>();
+
         while (!MentionsIterator.Completed) {
 
             var page = await MentionsIterator.NextPageAsync();
             Console.WriteLine("Retrieved " + page.Count() + " mentions on this page");
 
             foreach (var tweet in page) {
-                Console.WriteLine($"Mention contents: {tweet.FullText}");
-
-                //Check if mention has been evaluated recently
-                if (RecentKnowns.Contains(tweet.IdStr)) {
-                    System.Console.WriteLine("Mention was recently seen in this environment, ignoring");
-                    continue;
-                }
-
-                System.Console.WriteLine("Mention wasn't seen recently, checking FireStore..");
-
-                //Check if mention has been evaluated ever
-                if (await CheckFireStoreDB.IsKnown(tweet)) {
-                    System.Console.WriteLine("Mention is known to FireStore DB, adding to recent mentions");
-                    RecentKnowns.Add(tweet.IdStr);
-                    continue;
-                }
-                System.Console.WriteLine("Mention is unknown to DB, adding..");
-                await CheckFireStoreDB.WriteToDB(tweet);
+                // Console.WriteLine($"Mention contents: {tweet.FullText}");
+                Mentions.Add(tweet);
             }
+        }
+
+        foreach (var tweet in Mentions) {
+
+            //Check if mention has been evaluated recently
+            if (RecentKnowns.Contains(tweet.IdStr)) {
+                System.Console.WriteLine("Mention was recently seen in this environment, ignoring");
+                continue;
+            }
+
+            System.Console.WriteLine("Mention wasn't seen recently, checking FireStore..");
+
+            //Check if mention has been evaluated ever
+            if (await CheckFireStoreDB.IsKnown(tweet)) {
+                System.Console.WriteLine("Mention is known to FireStore DB, adding to recent mentions");
+                RecentKnowns.Add(tweet.IdStr);
+                continue;
+            }
+            System.Console.WriteLine("Mention is unknown to DB, adding..");
+            await CheckFireStoreDB.WriteToDB(tweet);
         }
     }
 }
