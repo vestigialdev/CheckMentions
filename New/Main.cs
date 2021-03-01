@@ -1,13 +1,29 @@
-using Google.Cloud.Firestore;
+using Google.Events.Protobuf.Cloud.PubSub.V1;
 using Google.Cloud.Functions.Framework;
+using System.Collections.Generic;
 using Microsoft.AspNetCore.Http;
+using Google.Cloud.Firestore;
 using System.Threading.Tasks;
 using Tweetinvi;
-using Tweetinvi.Models;
-using System.Collections.Generic;
+using CloudNative.CloudEvents;
+using System.Threading;
 
-public partial class Function : IHttpFunction {
+namespace CheckMentionsEntry {
+    public partial class HTTPHandler : IHttpFunction {
+        public async Task HandleAsync(HttpContext context) {
+            context.Response.StatusCode = 200;
+            await CheckMentions.GeneralEntryPoint();
+        }
+    }
+    public class Function : ICloudEventFunction<MessagePublishedData> {
+        public Task HandleAsync(CloudEvent cloudEvent, MessagePublishedData data, CancellationToken cancellationToken) {
+            CheckMentions.GeneralEntryPoint();
+            return Task.CompletedTask;
+        }
+    }
+}
 
+public static partial class CheckMentions {
     static string ProjectId => "alttextnetwork";
 
     static TwitterClient _client;
@@ -18,12 +34,9 @@ public partial class Function : IHttpFunction {
 
     static List<long> RecentlyParsed = new List<long>();
 
-    public async Task HandleAsync(HttpContext context) {
-        context.Response.StatusCode = 200;
-        await GeneralEntryPoint();
-    }
 
-    async Task GeneralEntryPoint() {
+
+    public static async Task GeneralEntryPoint() {
         var recentMentions = await GetMentions();
         var newMentions = await FilterMentions(recentMentions, FirestoreDb);
         WriteNewMentionsToDB(newMentions, FirestoreDb);

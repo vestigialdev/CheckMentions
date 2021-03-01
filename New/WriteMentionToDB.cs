@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using Google.Cloud.Firestore;
 using Tweetinvi.Models;
 
-public partial class Function : IHttpFunction {
+public partial class CheckMentions {
 
-    async void WriteNewMentionsToDB(List<ITweet> newMentions, FirestoreDb DB) {
+    static async void WriteNewMentionsToDB(List<ITweet> newMentions, FirestoreDb DB) {
         foreach (var tweet in newMentions) {
             try {
                 //Mention is unknown so upload it to the database

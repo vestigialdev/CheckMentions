@@ -6,9 +6,9 @@ using Tweetinvi.Models;
 using System.Linq;
 using System;
 
-public partial class Function : IHttpFunction {
+public partial class CheckMentions {
 
-    async Task<List<ITweet>> GetMentions() {
+    static async Task<List<ITweet>> GetMentions() {
         var tweets = new List<ITweet>();
         var mentionsTimelineIterator = Client.Timelines.GetMentionsTimelineIterator();
 

@@ -4,9 +4,9 @@ using System.Threading.Tasks;
 using Google.Cloud.Firestore;
 using Tweetinvi.Models;
 
-public partial class Function : IHttpFunction {
+public partial class CheckMentions {
 
-    async Task<List<ITweet>> FilterMentions(List<ITweet> tweets, FirestoreDb DB) {
+    static async Task<List<ITweet>> FilterMentions(List<ITweet> tweets, FirestoreDb DB) {
         var newMentions = new List<ITweet>();
         foreach (var tweet in tweets) {
 
