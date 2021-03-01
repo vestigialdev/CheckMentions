@@ -12,11 +12,13 @@ namespace CheckMentionsEntry {
     public partial class HTTPHandler : IHttpFunction {
         public async Task HandleAsync(HttpContext context) {
             context.Response.StatusCode = 200;
+            System.Console.WriteLine("HTTP entrypoint");
             await CheckMentions.GeneralEntryPoint();
         }
     }
     public class Function : ICloudEventFunction<MessagePublishedData> {
         public Task HandleAsync(CloudEvent cloudEvent, MessagePublishedData data, CancellationToken cancellationToken) {
+            System.Console.WriteLine("CloudEvent entrypoint");
             CheckMentions.GeneralEntryPoint().GetAwaiter().GetResult();
             return Task.CompletedTask;
         }
@@ -37,6 +39,8 @@ public static partial class CheckMentions {
 
 
     public static async Task GeneralEntryPoint() {
+        System.Console.WriteLine("GeneralEntryPoint");
+
         var recentMentions = await GetMentions();
         var newMentions = await FilterMentions(recentMentions, FirestoreDb);
         WriteNewMentionsToDB(newMentions, FirestoreDb);
