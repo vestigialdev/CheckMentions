@@ -17,7 +17,7 @@ namespace CheckMentionsEntry {
     }
     public class Function : ICloudEventFunction<MessagePublishedData> {
         public Task HandleAsync(CloudEvent cloudEvent, MessagePublishedData data, CancellationToken cancellationToken) {
-            CheckMentions.GeneralEntryPoint();
+            CheckMentions.GeneralEntryPoint().GetAwaiter().GetResult();
             return Task.CompletedTask;
         }
     }
