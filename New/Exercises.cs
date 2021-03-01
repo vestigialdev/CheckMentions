@@ -8,17 +8,18 @@ using System;
 using Google.Cloud.Functions.Framework;
 
 public partial class Function : IHttpFunction {
+
     async Task PrintUsername() {
-        var user = await client.Users.GetAuthenticatedUserAsync();
+        var user = await Client.Users.GetAuthenticatedUserAsync();
         Console.WriteLine("Printing Username of Twitter account:");
         Console.WriteLine(user);
     }
     async Task PostTweet() {
-        var tweet = await client.Tweets.PublishTweetAsync("Posting from Google Cloud Function!");
+        var tweet = await Client.Tweets.PublishTweetAsync("Posting from Google Cloud Function!");
         Console.WriteLine("You published the tweet : " + tweet);
     }
     async Task GetTimeline() {
-        var userTimelineIterator = client.Timelines.GetUserTimelineIterator("tweetinviapi");
+        var userTimelineIterator = Client.Timelines.GetUserTimelineIterator("tweetinviapi");
 
         while (!userTimelineIterator.Completed) {
             var page = await userTimelineIterator.NextPageAsync();
@@ -28,7 +29,7 @@ public partial class Function : IHttpFunction {
         Console.WriteLine("We have now retrieved all the tweets!");
     }
     async Task GetMentions() {
-        var mentionsTimelineIterator = client.Timelines.GetMentionsTimelineIterator();
+        var mentionsTimelineIterator = Client.Timelines.GetMentionsTimelineIterator();
         // var userTimelineIterator = client.Timelines.GetUserTimelineIterator("tweetinviapi");
 
         while (!mentionsTimelineIterator.Completed) {

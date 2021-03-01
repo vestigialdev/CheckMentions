@@ -9,16 +9,6 @@ public static class AnalyzeMention {
     static string TwitterImageHostRegexPattern = @"(https?:\/\/pbs.twimg.com\/media\/([a-zA-Z0-9_]){15}.(png|gif|jpg))";
     static int Offset => "https://pbs.twimg.com/media/".Length;
 
-    // async public static void Analyze(ITweet tweet) {
-
-    //     if (ContainsValidMedia(tweet)) {
-    //         ParseMedia(tweet);
-    //     } else if (IsAReply(tweet)) {
-    //         var parentTweet = GetReplyParent(tweet);
-    //         Analyze(parentTweet.Result);
-    //     }
-
-    // }
     async static Task<ITweet> GetReplyParent(ITweet tweet) {
         var result = await tweet.Client.Tweets.GetTweetAsync((long)tweet.InReplyToStatusId);
         return result;
