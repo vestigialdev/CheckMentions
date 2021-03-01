@@ -10,7 +10,7 @@ public static class GoogleSecrets {
 
         try {
             var secretsPath = $"projects/{projectId}/secrets/{secretName}/versions/latest";
-            System.Console.WriteLine($"GoogleSecrets getting: {secretsPath}");
+            // System.Console.WriteLine($"GoogleSecrets getting: {secretsPath}");
 
             var result = await Client.AccessSecretVersionAsync(secretsPath);
             var secretData = result.Payload.Data.ToString(System.Text.Encoding.UTF8);

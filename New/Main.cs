@@ -3,6 +3,8 @@ using Google.Cloud.Functions.Framework;
 using Microsoft.AspNetCore.Http;
 using System.Threading.Tasks;
 using Tweetinvi;
+using Tweetinvi.Models;
+using System.Collections.Generic;
 
 public partial class Function : IHttpFunction {
 
@@ -12,18 +14,19 @@ public partial class Function : IHttpFunction {
     static TwitterClient Client => _client ??= Twitter.GetClient(ProjectId).Result;
 
     static FirestoreDb _FirestoreDb;
-    static FirestoreDb FirestoreDb => _FirestoreDb ??= FireStore.GetClient(ProjectId);
+    static FirestoreDb FirestoreDb => _FirestoreDb ??= FirestoreDb.Create(ProjectId);
+
+    static List<long> RecentlyParsed = new List<long>();
 
     public async Task HandleAsync(HttpContext context) {
-        await GeneralEntryPoint();
         context.Response.StatusCode = 200;
+        await GeneralEntryPoint();
     }
 
     async Task GeneralEntryPoint() {
-        // await PrintUsername();
-        // await PostTweet();
-        // await GetTimeline();
-        await GetMentions();
+        var recentMentions = await GetMentions();
+        var newMentions = await FilterMentions(recentMentions, FirestoreDb);
+        WriteNewMentionsToDB(newMentions, FirestoreDb);
         return;
     }
 }
