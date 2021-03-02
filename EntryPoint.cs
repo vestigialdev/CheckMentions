@@ -23,6 +23,8 @@ namespace CheckMentionsEntry {
             if (cloudEvent.GetAttributes().ContainsKey("clearCache")) {
                 System.Console.WriteLine("Clearing recently parsed local cache");
                 CheckMentions.RecentlyParsed.Clear();
+            } else {
+                System.Console.WriteLine("Clear cache attribute not detected");
             }
 
             await CheckMentions.GeneralEntryPoint();
