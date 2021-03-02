@@ -33,6 +33,7 @@ public partial class CheckMentions {
                 throw e;
             }
         }
+
         System.Console.WriteLine($"New mentions {newMentions.Count}");
 
         return newMentions;
