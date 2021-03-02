@@ -9,7 +9,7 @@ using System;
 public partial class CheckMentions {
 
     static async Task<List<ITweet>> GetMentions() {
-        System.Console.WriteLine("GetMentions");
+        Print("GetMentions()");
 
         var tweets = new List<ITweet>();
         var mentionsTimelineIterator = Client.Timelines.GetMentionsTimelineIterator();
@@ -21,7 +21,7 @@ public partial class CheckMentions {
                 tweets.Add(item);
             }
         }
-        System.Console.WriteLine($"GetMentions: {tweets.Count} total mentions");
+        Print($"GetMentions: {tweets.Count} total mentions");
 
         return tweets;
     }

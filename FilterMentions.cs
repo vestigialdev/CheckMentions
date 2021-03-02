@@ -7,7 +7,7 @@ using Tweetinvi.Models;
 public partial class CheckMentions {
 
     static async Task<List<ITweet>> FilterMentions(List<ITweet> tweets, FirestoreDb DB) {
-        System.Console.WriteLine("FilterMentions");
+        Print("FilterMentions");
 
         var newMentions = new List<ITweet>();
         foreach (var tweet in tweets) {
@@ -29,12 +29,12 @@ public partial class CheckMentions {
                     newMentions.Add(tweet);
                 }
             } catch (System.Exception e) {
-                System.Console.WriteLine("Problem querying FireStore DB for known mentions");
-                throw e;
+                Print("Problem querying FireStore DB for known mentions", true);
+                Print(e.Message, true);
             }
         }
 
-        System.Console.WriteLine($"New mentions {newMentions.Count}");
+        Print($"New mentions {newMentions.Count}");
 
         return newMentions;
     }

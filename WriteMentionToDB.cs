@@ -18,11 +18,11 @@ public partial class CheckMentions {
                 { "hasMedia", "null" }
             };
 
-                System.Console.WriteLine($"Mention #{tweet.IdStr} written to db.");
+                Print($"Mention #{tweet.IdStr} written to db.");
                 await docRef.SetAsync(user);
             } catch (System.Exception e) {
-                System.Console.WriteLine("Problem writing to FireStore  DB");
-                throw e;
+                Print("Problem writing to FireStore  DB");
+                Print(e.Message);
             }
         }
     }

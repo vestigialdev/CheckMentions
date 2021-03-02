@@ -15,10 +15,19 @@ public static partial class CheckMentions {
     public static List<long> RecentlyParsed = new List<long>();
 
 
+    static bool VerboseDebugging = false;
 
-    public static async Task GeneralEntryPoint() {
-        System.Console.WriteLine("GeneralEntryPoint");
+    static void Print(string s, bool force = false) {
+        if (VerboseDebugging || force) {
+            System.Console.WriteLine(s);
+        }
+    }
 
+    public static async Task GeneralEntryPoint(bool verboseDebugging = false) {
+        VerboseDebugging = verboseDebugging;
+
+
+        Print("GeneralEntryPoint");
         var recentMentions = await GetMentions();
         var newMentions = await FilterMentions(recentMentions, FirestoreDb);
         WriteNewMentionsToDB(newMentions, FirestoreDb);

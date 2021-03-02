@@ -12,26 +12,28 @@ namespace CheckMentionsEntry {
     public partial class HTTPHandler : IHttpFunction {
         public async Task HandleAsync(HttpContext context) {
             context.Response.StatusCode = 200;
-            // System.Console.WriteLine("HTTP entrypoint");
-            await CheckMentions.GeneralEntryPoint();
+            await CheckMentions.GeneralEntryPoint(true);
         }
     }
     public class CloudFunction : ICloudEventFunction<MessagePublishedData> {
         public async Task HandleAsync(CloudEvent cloudEvent, MessagePublishedData data, CancellationToken cancellationToken) {
-            // System.Console.WriteLine("CloudEvent entrypoint");
-
+            bool verbose = false;
             if (data.Message.Attributes != null) {
-                // System.Console.WriteLine($"Has {data.Message.Attributes.Count} attributes");
 
+                //Clear local mentions cache?
                 if (data.Message.Attributes.ContainsKey("clearCache")) {
                     System.Console.WriteLine("Clearing recently parsed local cache");
                     CheckMentions.RecentlyParsed.Clear();
-                } else {
-                    // System.Console.WriteLine("Clear cache attribute not detected");
+                }
+
+                //Set log level
+                if (data.Message.Attributes.ContainsKey("verbose")) {
+                    System.Console.WriteLine("Setting verbose logging");
+                    verbose = true;
                 }
             }
 
-            await CheckMentions.GeneralEntryPoint();
+            await CheckMentions.GeneralEntryPoint(verbose);
             return;
         }
     }
