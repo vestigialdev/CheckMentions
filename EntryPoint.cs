@@ -20,11 +20,15 @@ namespace CheckMentionsEntry {
         public async Task HandleAsync(CloudEvent cloudEvent, MessagePublishedData data, CancellationToken cancellationToken) {
             System.Console.WriteLine("CloudEvent entrypoint");
 
-            if (cloudEvent.GetAttributes().ContainsKey("clearCache")) {
-                System.Console.WriteLine("Clearing recently parsed local cache");
-                CheckMentions.RecentlyParsed.Clear();
-            } else {
-                System.Console.WriteLine("Clear cache attribute not detected");
+            if (data.Message.Attributes != null) {
+                System.Console.WriteLine($"Has {data.Message.Attributes.Count} attributes");
+
+                if (data.Message.Attributes.ContainsKey("clearCache")) {
+                    System.Console.WriteLine("Clearing recently parsed local cache");
+                    CheckMentions.RecentlyParsed.Clear();
+                } else {
+                    System.Console.WriteLine("Clear cache attribute not detected");
+                }
             }
 
             await CheckMentions.GeneralEntryPoint();
