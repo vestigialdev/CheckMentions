@@ -12,22 +12,22 @@ namespace CheckMentionsEntry {
     public partial class HTTPHandler : IHttpFunction {
         public async Task HandleAsync(HttpContext context) {
             context.Response.StatusCode = 200;
-            System.Console.WriteLine("HTTP entrypoint");
+            // System.Console.WriteLine("HTTP entrypoint");
             await CheckMentions.GeneralEntryPoint();
         }
     }
     public class CloudFunction : ICloudEventFunction<MessagePublishedData> {
         public async Task HandleAsync(CloudEvent cloudEvent, MessagePublishedData data, CancellationToken cancellationToken) {
-            System.Console.WriteLine("CloudEvent entrypoint");
+            // System.Console.WriteLine("CloudEvent entrypoint");
 
             if (data.Message.Attributes != null) {
-                System.Console.WriteLine($"Has {data.Message.Attributes.Count} attributes");
+                // System.Console.WriteLine($"Has {data.Message.Attributes.Count} attributes");
 
                 if (data.Message.Attributes.ContainsKey("clearCache")) {
                     System.Console.WriteLine("Clearing recently parsed local cache");
                     CheckMentions.RecentlyParsed.Clear();
                 } else {
-                    System.Console.WriteLine("Clear cache attribute not detected");
+                    // System.Console.WriteLine("Clear cache attribute not detected");
                 }
             }
 
